@@ -99,7 +99,7 @@ class NetworkReachabilityNotifier {
             return true
         case .cellular:
             return allowsCellularAccess
-        case .none, .unavailable:
+        case .none:
             return false
         }
     }
@@ -139,7 +139,7 @@ class NetworkReachabilityNotifier {
             isReachable = true
         case .cellular:
             isReachable = allowsCellularAccess
-        case .none, .unavailable:
+        case .none:
             isReachable = false
         }
 
