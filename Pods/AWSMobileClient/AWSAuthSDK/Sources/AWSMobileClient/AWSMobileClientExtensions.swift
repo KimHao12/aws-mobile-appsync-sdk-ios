@@ -505,60 +505,23 @@ extension AWSMobileClient {
         }
     }
     
-    private func handleHostedUISignOutResult(_ error: Error?, completionHandler: @escaping ((Error?) -> Void)) {
-        if (error != nil) {
-            completionHandler(AWSMobileClientError.makeMobileClientError(from: error!))
-        } else {
-            // If the token is successfully invalidated, we clear tokens locally and perform signout flow.
-            self.signOut()
-            completionHandler(nil)
-        }
-    }
-    
-    
-    /// Asynchronous signout method which requires network activity. Based on the options specified in `SignOutOptions`, appropriate tasks will be performed.
-    ///
-    /// - Parameters:
-    ///   - options: SignOutOptions which specify actions.
-    ///   - presentationAnchor: If you have
-    ///   - completionHandler: completion handler for success or error callback.
-    @available(iOS 13, *)
-    public func signOut(presentationAnchor: ASPresentationAnchor,
-                        options: SignOutOptions = SignOutOptions(),
-                        completionHandler: @escaping ((Error?) -> Void)) {
-        internalSignOut(presentationAnchor: presentationAnchor,
-                        options: options,
-                        completionHandler: completionHandler)
-    }
-    
-    
     /// Asynchronous signout method which requires network activity. Based on the options specified in `SignOutOptions`, appropriate tasks will be performed.
     ///
     /// - Parameters:
     ///   - options: SignOutOptions which specify actions.
     ///   - completionHandler: completion handler for success or error callback.
-    public func signOut(options: SignOutOptions = SignOutOptions(),
-                        completionHandler: @escaping ((Error?) -> Void)) {
-        internalSignOut(presentationAnchor: nil,
-                        options: options,
-                        completionHandler: completionHandler)
-    }
-
-    private func internalSignOut(presentationAnchor: ASPresentationAnchor? = nil,
-                                 options: SignOutOptions = SignOutOptions(),
-                        completionHandler: @escaping ((Error?) -> Void)) {
-        // If using hosted UI, we need to launch SFSafariVC/SFAuthSession/ASWebAuthenticationSession to invalidate token
+    public func signOut(options: SignOutOptions = SignOutOptions(), completionHandler: @escaping ((Error?) -> Void)) {
+        // If using hosted UI, we need to launch SFSafariVC or SFAuthSession to invalidate token
         if federationProvider == .hostedUI {
             if options.invalidateTokens {
-                revokeIfSessionIsRevocable { _ in
-                    // Ensure UI actions are performed on the main thread since revoke token may be performed on a
-                    // background thread.
-                    DispatchQueue.main.async {
-                        if let anchor = presentationAnchor {
-                            self.hostedUISignOut(presentationAnchor: anchor, completionHandler: completionHandler)
-                        } else {
-                            self.hostedUILegacySignOut(completionHandler: completionHandler)
-                        }
+                AWSCognitoAuth.init(forKey: CognitoAuthRegistrationKey).signOut { (error) in
+                    // If there is an error invalidating tokens, we return error to the developer.
+                    if (error != nil) {
+                        completionHandler(AWSMobileClientError.makeMobileClientError(from: error!))
+                    } else {
+                        // If the token is successfully invalidated, we clear tokens locally and perform signout flow.
+                        self.signOut()
+                        completionHandler(nil)
                     }
                 }
             }
@@ -579,53 +542,8 @@ extension AWSMobileClient {
             }
             return
         }
-        // If using userpools sign in (not global sign out or federated sign in), revoke the token before signing out
-        if federationProvider == .userPools {
-            revokeIfSessionIsRevocable { _ in
-                self.signOut()
-                completionHandler(nil)
-            }
-            return
-        }
-        // If signing in with federated sign in, perform local sign out
         signOut()
         completionHandler(nil)
-    }
-    
-    /// Returns if the session is not revocable, attempts to revoke the token if it is.
-    private func revokeIfSessionIsRevocable(completionHandler: @escaping ((Error?) -> Void)) {
-        guard let isSessionRevocable = self.userpoolOpsHelper.currentActiveUser?.isSessionRevocable,
-              isSessionRevocable else {
-            completionHandler(nil)
-            return
-        }
-        
-        let _ = self.userpoolOpsHelper.currentActiveUser?.revokeToken().continueWith { (task) -> Any? in
-            if let error = task.error {
-                completionHandler(AWSMobileClientError.makeMobileClientError(from: error))
-            } else if let _ = task.result {
-                completionHandler(nil)
-            }
-            return nil
-        }
-    }
-    
-    private func hostedUISignOut(presentationAnchor: ASPresentationAnchor,
-                                 completionHandler: @escaping ((Error?) -> Void)) {
-        if #available(iOS 13, *) {
-            AWSCognitoAuth.init(forKey: CognitoAuthRegistrationKey).signOut(withWebUI: presentationAnchor) { (error) in
-                self.handleHostedUISignOutResult(error, completionHandler: completionHandler)
-            }
-        } else {
-            // Fallback on earlier versions
-            self.hostedUILegacySignOut(completionHandler: completionHandler)
-        }
-    }
-    
-    private func hostedUILegacySignOut(completionHandler: @escaping ((Error?) -> Void)) {
-        AWSCognitoAuth.init(forKey: CognitoAuthRegistrationKey).signOut { (error) in
-            self.handleHostedUISignOutResult(error, completionHandler: completionHandler)
-        }
     }
     
     /// Signs out the current logged in user and clears the local keychain store.
@@ -856,7 +774,6 @@ extension AWSMobileClient {
                         let errorType = AWSCognitoAuthClientErrorType(rawValue: (sessionError as NSError).code),
                         (errorType == .errorExpiredRefreshToken) {
                         self.pendingGetTokensCompletion = completionHandler
-                        self.invalidateCachedTemporaryCredentials()
                         self.mobileClientStatusChanged(userState: .signedOutUserPoolsTokenInvalid,
                                                        additionalInfo: [self.ProviderKey:"OAuth"])
                         // return early without releasing the tokenFetch lock.
@@ -973,18 +890,8 @@ extension AWSMobileClient {
             completionHandler(nil, AWSMobileClientError.notSignedIn(message: notSignedInErrorMessage))
             return
         }
-        guard let currentActiveUser = self.userpoolOpsHelper.currentActiveUser else {
-            completionHandler(nil, AWSMobileClientError.notSignedIn(message: self.notSignedInErrorMessage))
-            return
-        }
-        self.getTokens { _, error in
-            guard error == nil else {
-                completionHandler(nil, error)
-                return
-            }
-            let userDetails = AWSMobileClientUserDetails(with: currentActiveUser)
-            userDetails.getUserAttributes(completionHandler: completionHandler)
-        }
+        let userDetails = AWSMobileClientUserDetails(with: self.userpoolOpsHelper.currentActiveUser!)
+        userDetails.getUserAttributes(completionHandler: completionHandler)
     }
     
     /// Confirm the updated attributes using a confirmation code.
@@ -1046,7 +953,6 @@ extension AWSMobileClient: UserPoolAuthHelperlCallbacks {
         switch self.currentUserState {
         case .signedIn, .signedOutUserPoolsTokenInvalid:
             self.userpoolOpsHelper.passwordAuthTaskCompletionSource = passwordAuthenticationCompletionSource
-            self.invalidateCachedTemporaryCredentials()
             self.mobileClientStatusChanged(userState: .signedOutUserPoolsTokenInvalid, additionalInfo: ["username":self.userPoolClient?.currentUser()?.username ?? ""])
         default:
             break
@@ -1084,7 +990,6 @@ extension AWSMobileClient: UserPoolAuthHelperlCallbacks {
         if ((self.currentUserState == .signedIn || self.currentUserState == .signedOutUserPoolsTokenInvalid) &&
             customAuthenticationInput.challengeParameters.isEmpty) {
             let username = self.userPoolClient?.currentUser()?.username ?? ""
-            self.invalidateCachedTemporaryCredentials()
             self.mobileClientStatusChanged(userState: .signedOutUserPoolsTokenInvalid,
                                            additionalInfo: ["username": username])
         } else {

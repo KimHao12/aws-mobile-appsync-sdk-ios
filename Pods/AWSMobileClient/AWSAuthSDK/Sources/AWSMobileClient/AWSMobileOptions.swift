@@ -35,15 +35,6 @@ import Foundation
         self.primaryColor = primaryColor
         self.disableSignUpButton = disableSignUpButton
     }
-    
-    public override convenience init() {
-        self.init(canCancel: false,
-                  logoImage: nil,
-                  backgroundColor: nil,
-                  secondaryBackgroundColor: nil,
-                  primaryColor: .systemBlue,
-                  disableSignUpButton: false)
-    }
 }
 
 /// Signout options to change the default behavior.
@@ -101,7 +92,6 @@ public struct HostedUIOptions {
     let tokenURIQueryParameters: [String: String]?
     let signOutURIQueryParameters: [String: String]?
     
-    let signInPrivateSession: Bool
     
     /// Initializer for hosted UI options.
     ///
@@ -121,8 +111,7 @@ public struct HostedUIOptions {
                 federationProviderName: String? = nil,
                 signInURIQueryParameters: [String: String]? = nil,
                 tokenURIQueryParameters: [String: String]? = nil,
-                signOutURIQueryParameters: [String: String]? = nil,
-                signInPrivateSession: Bool = false) {
+                signOutURIQueryParameters: [String: String]? = nil) {
         self.disableFederation = disableFederation
         self.scopes = scopes
         if let identityProvider = identityProvider {
@@ -140,7 +129,6 @@ public struct HostedUIOptions {
         self.signInURIQueryParameters = signInURIQueryParameters
         self.tokenURIQueryParameters = tokenURIQueryParameters
         self.signOutURIQueryParameters = signOutURIQueryParameters
-        self.signInPrivateSession = signInPrivateSession
     }
 }
 

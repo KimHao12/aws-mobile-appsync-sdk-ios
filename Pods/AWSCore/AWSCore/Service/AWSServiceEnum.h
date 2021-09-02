@@ -292,18 +292,7 @@ typedef NS_ENUM(NSInteger, AWSServiceType) {
      *  Amazon Translate
      */
     AWSServiceTranslate NS_SWIFT_NAME(Translate),
-    /**
-     *  Amazon Location
-     */
-    AWSServiceLocation NS_SWIFT_NAME(Location),
-    /**
-     *  Amazon Chime Messaging
-     */
-    AWSServiceChimeSDKMessaging NS_SWIFT_NAME(ChimeSDKMessaging),
-    /**
-     *  Amazon Chime Identity
-     */
-    AWSServiceChimeSDKIdentity NS_SWIFT_NAME(ChimeSDKIdentity),
+    
 };
 
 #endif
