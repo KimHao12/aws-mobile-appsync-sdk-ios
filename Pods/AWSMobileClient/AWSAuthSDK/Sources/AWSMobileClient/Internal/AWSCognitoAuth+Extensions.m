@@ -14,11 +14,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#ifdef USE_XCF
-    #import "AWSMobileClientXCF-Mixed-Swift.h"
-#else
-    #import "AWSMobileClient-Mixed-Swift.h"
-#endif
+#import <AWSMobileClient/AWSCognitoAuth.h>
 #import <AWSCore/AWSCore.h>
 
 @interface AWSCognitoAuthConfiguration()
@@ -40,8 +36,7 @@
                   signOutUriQueryParameters:(NSDictionary<NSString *, NSString *> *) signOutUriQueryParameters
                     tokenUriQueryParameters:(NSDictionary<NSString *, NSString *> *) tokenUriQueryParameters
                          isProviderExternal:(BOOL) isProviderExternal
-               cognitoUserPoolServiceConfig:(nullable AWSServiceConfiguration *) serviceConfig
-                       signInPrivateSession:(BOOL)isSignInPrivateSession;
+               cognitoUserPoolServiceConfig:(nullable AWSServiceConfiguration *) serviceConfig;
 
 @end
 
@@ -61,8 +56,8 @@
            signInUriQueryParameters:(nullable NSDictionary<NSString *, NSString *> *) signInUriQueryParameters
           signOutUriQueryParameters:(nullable NSDictionary<NSString *, NSString *> *) signOutUriQueryParameters
             tokenUriQueryParameters:(nullable NSDictionary<NSString *, NSString *> *) tokenUriQueryParameters
-       userPoolServiceConfiguration:(nullable AWSServiceConfiguration *)serviceConfiguration
-               signInPrivateSession:(BOOL)signInPrivateSession {
+       userPoolServiceConfiguration:(nullable AWSServiceConfiguration *)serviceConfiguration {
+    
     BOOL isProviderExternal = YES;
     if (signInUri == nil && signOutUri == nil && tokensUri == nil) {
         isProviderExternal = NO;
@@ -85,8 +80,7 @@
                    signOutUriQueryParameters:signOutUriQueryParameters
                      tokenUriQueryParameters:tokenUriQueryParameters
                           isProviderExternal:isProviderExternal
-                cognitoUserPoolServiceConfig:serviceConfiguration
-                        signInPrivateSession:signInPrivateSession];
+                cognitoUserPoolServiceConfig:serviceConfiguration];
 }
 
 @end

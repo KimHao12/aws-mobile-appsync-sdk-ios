@@ -15,7 +15,6 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import <AuthenticationServices/AuthenticationServices.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -106,30 +105,6 @@ typedef void (^AWSCognitoAuthSignOutBlock)(NSError * _Nullable error);
 + (void)removeCognitoAuthForKey:(NSString *)key;
 
 /**
- Launches the signin UI and updates the session after the user logs in.
- @param vc Presentation view controller to display the hosted UI signIn
- @param completion completion block to invoke on completion
- */
-- (void)launchSignInWithViewController:(UIViewController *) vc
-                            completion:(nullable AWSCognitoAuthGetSessionBlock) completion;
-
-/**
- Launches the signin UI and updates the session after the user logs in.
- @param anchor Presentation anchor to display the hosted UI signIn
- @param completion completion block to invoke on completion
- */
-- (void)launchSignInWithWebUI:(nonnull ASPresentationAnchor) anchor
-                   completion:(nullable AWSCognitoAuthGetSessionBlock) completion API_AVAILABLE(ios(13));
-
-/**
- Get a session with id, access and refresh tokens.
- @param anchor Presentation anchor to display the hosted UI on if needed during sign in.
- @param completion completion block to invoke on completion
- */
-- (void)getSessionWithWebUI:(nonnull ASPresentationAnchor) anchor
-                 completion:(nullable AWSCognitoAuthGetSessionBlock) completion API_AVAILABLE(ios(13));
-
-/**
  Get a session with id, access and refresh tokens.
  @param vc viewController to display the UI on if needed during sign in.
  @param completion completion block to invoke on completion
@@ -141,9 +116,6 @@ typedef void (^AWSCognitoAuthSignOutBlock)(NSError * _Nullable error);
  @param completion completion block to invoke on completion
  */
 - (void)getSession: (nullable AWSCognitoAuthGetSessionBlock) completion;
-
-- (void) signOutWithWebUI:(nonnull ASPresentationAnchor) anchor
-               completion:(AWSCognitoAuthSignOutBlock)completion API_AVAILABLE(ios(13));
 
 /**
  Sign out locally and from the server.
