@@ -6,7 +6,7 @@ inhibit_all_warnings!
 AWS_SDK_VERSION = "2.19.1"
 
 target "AWSAppSync" do
-  pod "AWSCore", "~> #{AWS_SDK_VERSION}"
+  pod "AWSCore", '= 2.19.1'
   pod "SQLite.swift", "~> 0.12.2"
   pod "ReachabilitySwift", '~> 4.3.0'
   pod "AppSyncRealTimeClient", "~> 1.4"
@@ -15,7 +15,7 @@ target "AWSAppSync" do
 end
 
 target "AWSAppSyncTestCommon" do
-  pod "AWSS3", "~> #{AWS_SDK_VERSION}"
+  pod "AWSS3", '= 2.19.1'
   pod "ReachabilitySwift", '~> 4.3.0'
   # We directly access a database connection to verify certain initialization
   # setups
@@ -24,8 +24,8 @@ target "AWSAppSyncTestCommon" do
 end
 
 target "AWSAppSyncTestApp" do
-  pod "AWSS3", "~> #{AWS_SDK_VERSION}"
-  pod "AWSMobileClient", "~> #{AWS_SDK_VERSION}"
+  pod "AWSS3", '= 2.19.1'
+  pod "AWSMobileClient", '= 2.19.1'
 end
 
 target "AWSAppSyncTestHostApp" do
@@ -38,5 +38,5 @@ target "AWSAppSyncIntegrationTests" do
 end
 
 target "ApolloTests" do
-  pod "AWSCore", "~> #{AWS_SDK_VERSION}"
+  pod "AWSCore", '= 2.19.1'
 end
