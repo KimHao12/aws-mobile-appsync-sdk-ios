@@ -24,9 +24,9 @@ PODS:
 
 DEPENDENCIES:
   - AppSyncRealTimeClient (~> 1.4)
-  - AWSCore (~> 2.19.1)
-  - AWSMobileClient (~> 2.19.1)
-  - AWSS3 (~> 2.19.1)
+  - AWSCore (= 2.19.1)
+  - AWSMobileClient (= 2.19.1)
+  - AWSS3 (= 2.19.1)
   - ReachabilitySwift (~> 4.3.0)
   - SQLite.swift (~> 0.12.2)
   - SwiftLint
@@ -58,6 +58,6 @@ SPEC CHECKSUMS:
   Starscream: 4bb2f9942274833f7b4d296a55504dcfc7edb7b0
   SwiftLint: 99f82d07b837b942dd563c668de129a03fc3fb52
 
-PODFILE CHECKSUM: 132c4600ca46072bf232061dfcf80f4787e30b3e
+PODFILE CHECKSUM: 4162c41e2e57858e134e9118a8a7a7256ccbcb4e
 
 COCOAPODS: 1.11.0
